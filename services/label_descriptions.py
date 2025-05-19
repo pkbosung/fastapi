@@ -24,6 +24,7 @@ LABEL_EXPLANATIONS = {
     "hand_wash": "손세탁하세요.",
 
     # 누락된 라벨은 기본 설명 추가 (Null 방지)
+    "dry_clean_any_solvent_except_trichloroethylene":"트리클로로에틸렌을 제외한 모든 용제로 드라이클리닝 가능",
     "dry_clean": "드라이클리닝 하세요.",
     "dry_clean_any_solvent": "모든 용제를 사용한 드라이클리닝 가능.",
     "dry_clean_low_heat": "드라이클리닝 시 저온으로 설정하세요.",

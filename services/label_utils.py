@@ -9,7 +9,6 @@ symbol_scores = {
     "bleach": 0, "chlorine_bleach": 2, "non_chlorine_bleach": 5,
     "dry_clean": 20, "tumble_dry_low": 0, "tumble_dry_normal": 2
 }
-
 difficulty_thresholds = [
     (30, "★☆☆☆☆", "가정 세탁 가능"),
     (60, "★★☆☆☆", "주의하면 세탁 가능"),
