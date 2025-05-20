@@ -1,7 +1,7 @@
 import os
 from ultralytics import YOLO
 
-model = YOLO(r'/Users/bosung/wash_friends_app/fastapi/best.pt')
+model = YOLO(r'C:\Users\pkbos\servertest\best.pt')
 
 async def predict_symbols(file):
     image_path = f"./static/uploads/{file.filename}"

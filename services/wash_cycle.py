@@ -10,8 +10,10 @@ wash_cycles = {
     "속옷": 1,
     "티셔츠": 7,
     "바지": 10,
-    "코트": 60,
-    "스웨터": 21
+    "코트": 90,
+    "스웨터": 21,
+    "자켓":60,
+    
 }
 
 def get_recommended_wash_cycle(clothing_type: str) -> int:

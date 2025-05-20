@@ -1,4 +1,7 @@
 from services.label_descriptions import LABEL_EXPLANATIONS
+from services.material_scores import MATERIAL_SCORES
+from services.price_data import laundry_prices
+from difflib import get_close_matches
 
 symbol_scores = {
     "DN_wash": 50, "DN_dry": 15, "DN_bleach": 10, "DN_tumble_dry": 20,
@@ -9,6 +12,7 @@ symbol_scores = {
     "bleach": 0, "chlorine_bleach": 2, "non_chlorine_bleach": 5,
     "dry_clean": 20, "tumble_dry_low": 0, "tumble_dry_normal": 2
 }
+
 difficulty_thresholds = [
     (30, "★☆☆☆☆", "가정 세탁 가능"),
     (60, "★★☆☆☆", "주의하면 세탁 가능"),
@@ -17,8 +21,16 @@ difficulty_thresholds = [
     (float('inf'), "★★★★★", "가정 세탁 불가")
 ]
 
-def calculate_difficulty_score(symbols):
-    return sum(symbol_scores.get(lbl, 0) for lbl, _ in symbols)
+def normalize_clothing_type(clothing_type: str) -> str:
+    clothing_type = clothing_type.strip()
+    candidates = list(laundry_prices.keys())
+    match = get_close_matches(clothing_type, candidates, n=1, cutoff=0.6)
+    return match[0] if match else clothing_type
+
+def calculate_difficulty_score(symbols, material):
+    base_score = sum(symbol_scores.get(lbl, 0) for lbl, _ in symbols)
+    material_score = MATERIAL_SCORES.get(material, MATERIAL_SCORES.get("기타", 10))
+    return base_score + material_score
 
 def get_difficulty_level(score):
     for threshold, stars, recommendation in difficulty_thresholds:
@@ -26,10 +38,11 @@ def get_difficulty_level(score):
             return stars, recommendation
     return "★★★★★", "가정 세탁 불가"
 
-def process_symbols(detected_symbols, search_keywords, washing_info, youtube_videos):
-    score = calculate_difficulty_score(detected_symbols)
+def process_symbols(detected_symbols, material, search_keywords, washing_info, youtube_videos, clothing_type=None):
+    score = calculate_difficulty_score(detected_symbols, material)
     level, recommendation = get_difficulty_level(score)
-    return {
+
+    result = {
         "message": "다음 라벨들이 인식되었습니다!",
         "results": [{"description": LABEL_EXPLANATIONS.get(lbl, "설명 없음")} for lbl, _ in detected_symbols],
         "score": score,
@@ -39,3 +52,13 @@ def process_symbols(detected_symbols, search_keywords, washing_info, youtube_vid
         "washing_info": washing_info,
         "youtube_videos": youtube_videos
     }
+
+    if score >= 60 and clothing_type:
+        normalized_type = normalize_clothing_type(clothing_type)
+        price = laundry_prices.get(normalized_type)
+        if price:
+            result["estimated_prices"] = {normalized_type: f"{price}원"}
+        else:
+            result["estimated_prices"] = {normalized_type: "가격 정보 없음"}
+
+    return result

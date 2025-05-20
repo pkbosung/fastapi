@@ -1,6 +1,0 @@
-{
-    "와이셔츠_면": ["40C", "DN_bleach", "iron_low", "tumble_dry_low"],
-    "니트_울": ["hand_wash", "DN_bleach", "dry_flat"],
-    "정장_울": ["DN_wash", "DN_bleach", "DN_tumble_dry", "dry_clean_P"],
-    "후드티_폴리에스터": ["machine_wash_normal", "DN_bleach", "tumble_dry_low"]
-}
