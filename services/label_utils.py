@@ -28,18 +28,34 @@ def normalize_clothing_type(clothing_type: str) -> str:
     return match[0] if match else clothing_type
 
 def calculate_difficulty_score(symbols, material):
-    base_score = sum(symbol_scores.get(lbl, 0) for lbl, _ in symbols)
-    material_score = MATERIAL_SCORES.get(material, MATERIAL_SCORES.get("기타", 10))
-    return base_score + material_score
+    try:
+        base_score = sum(
+            symbol_scores.get(label, 0)
+            for label, confidence in symbols
+            if confidence > 0.0  # 보완된 라벨 제외
+        )
+    except Exception as e:
+        base_score = 0  # fallback
+
+    return base_score
+
+
 
 def get_difficulty_level(score):
+    try:
+        score = int(score)
+    except (ValueError, TypeError):
+        score = 0  # score가 None이거나 변환 실패 시 기본값 설정
+
     for threshold, stars, recommendation in difficulty_thresholds:
         if score <= threshold:
             return stars, recommendation
     return "★★★★★", "가정 세탁 불가"
 
+
+
 def process_symbols(detected_symbols, material, search_keywords, washing_info, youtube_videos, clothing_type=None):
-    score = calculate_difficulty_score(detected_symbols, material)
+    score = calculate_difficulty_score(detected_symbols, material) or 0
     level, recommendation = get_difficulty_level(score)
 
     result = {
