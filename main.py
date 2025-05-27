@@ -1,16 +1,15 @@
 from fastapi import FastAPI, File, UploadFile, Form, Query
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-
 from models.yolo_model import predict_symbols
 from services.label_utils import process_symbols, normalize_clothing_type
 from services.youtube_api import fetch_washing_info, fetch_youtube_videos
 from services.wash_cycle import generate_search_keywords, get_recommended_wash_cycle
 from services.price_data import laundry_prices
 from services.material_warnings import MATERIAL_WARNINGS
-from services.material_inference import infer_missing_labels
 from services.filter_utils import filter_detections
 from services.label_descriptions import LABEL_EXPLANATIONS
+from services.material_scores import MATERIAL_SCORES
 
 import logging
 
@@ -35,21 +34,23 @@ async def predict(
 ):
     # ✅ Step 1: 옷 종류 정규화
     normalized_type = normalize_clothing_type(clothing_type)
+    # ✅ Step 2: YOLO 예측 결과 (label, confidence, box)
+    raw_detections = await predict_symbols(file)
+
+# ✅ Step 2-1: x 좌표 기준 정렬
+    sorted_detections = sorted(raw_detections, key=lambda x: x[2][0])  # x1 기준 정렬
+
+# ✅ Step 2-2: (label, confidence)만 추출
+    detected_symbols = [(label, conf) for label, conf, _ in sorted_detections]
 
     # ✅ Step 2: YOLO 예측 결과 (label, confidence) 튜플 리스트
-    detected_symbols = await predict_symbols(file)
+    
 
     # ✅ Step 3: YOLO 결과로부터 라벨 추출
     detected_labels = [label for label, _ in detected_symbols]
 
-    # ✅ Step 4: 보완 추론 (confidence=0.0으로 추가됨)
-    inferred_symbols = infer_missing_labels(material, detected_labels)
-
-    # ✅ Step 5: YOLO + 보완 라벨 합치기
-    all_symbols = detected_symbols + inferred_symbols
-
     # ✅ Step 6: 중복 제거 + 유사 기호 그룹 필터링
-    final_symbols = filter_detections(all_symbols)
+    final_symbols = filter_detections(detected_symbols)
 
     # ✅ Step 7: 검색 키워드, 유튜브, 세탁 정보 등 부가 정보 생성
     search_keywords = generate_search_keywords(normalized_type, material)

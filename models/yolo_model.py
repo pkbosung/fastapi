@@ -19,5 +19,6 @@ async def predict_symbols(file):
             cls_idx = int(boxes.cls[i].cpu().numpy())
             confidence = float(boxes.conf[i].cpu().numpy()) * 100
             cls_name = model.names.get(cls_idx, "Unknown Class").strip()
-            detected_symbols.append((cls_name, confidence))
+            xyxy = boxes.xyxy[i].cpu().numpy()  # [x1, y1, x2, y2]
+            detected_symbols.append((cls_name, confidence, tuple(xyxy)))
     return detected_symbols

@@ -37,7 +37,10 @@ def calculate_difficulty_score(symbols, material):
     except Exception as e:
         base_score = 0  # fallback
 
-    return base_score
+    material_score = MATERIAL_SCORES.get(material, MATERIAL_SCORES.get("기타", 10))
+    total_score = base_score + material_score
+
+    return total_score
 
 
 
