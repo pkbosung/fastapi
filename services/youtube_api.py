@@ -1,6 +1,6 @@
 import requests
 
-YOUTUBE_API_KEY = "AIzaSyAAwufZNJMfdNplk9w-WCQEQjXMbDb6Sf0"
+YOUTUBE_API_KEY = ""
 
 def fetch_washing_info(keywords):
     search_results = []
